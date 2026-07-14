@@ -1,12 +1,14 @@
-# Render Blueprint — deploys both the PostgreSQL database and the backend web service.
-# Deploy via: Render Dashboard → New → Blueprint → connect this repo → use this file.
-
-databases:
-  - name: atf-db
-    databaseName: atf_projects
-    user: atf
-    plan: free
-    postgresMajorVersion: 15
+# Render Blueprint — deploys ONLY the backend web service.
+# Database is hosted externally on Supabase (Postgres). Provide SUPABASE DATABASE_URL
+# in the Render dashboard (Environment) before the first deploy.
+#
+# Supabase connection notes:
+#   - Use the DIRECT connection string (port 5432) for migrations, e.g.
+#     postgresql://postgres:[PASSWORD]@db.[PROJECT].supabase.co:5432/postgres
+#   - The pooler URL (port 6543, ?pgbouncer=true) is for runtime pooling;
+#     Prisma migrations should use the direct URL above.
+#   - Make sure the Supabase project allows connections from Render's IPs
+#     (Supabase allows all by default).
 
 services:
   - type: web
@@ -24,9 +26,7 @@ services:
       - key: PORT
         value: 10000
       - key: DATABASE_URL
-        fromDatabase:
-          name: atf-db
-          property: connectionString
+        sync: false   # paste your Supabase direct Postgres URL here
       - key: JWT_SECRET
         generateValue: true
       # Set these in the Render dashboard after the frontend (Vercel) is live:
