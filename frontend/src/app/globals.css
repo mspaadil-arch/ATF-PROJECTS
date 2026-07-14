@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy: #0A1628;
+  --navy-light: #1A2332;
+  --navy-card: #1E2D42;
+  --gold: #C9A84C;
+  --gold-light: #E8C06A;
+  --border: #2D3748;
+  --text-secondary: #A0AEC0;
+  --text-muted: #718096;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: var(--navy);
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* Gold accent underline for section headings */
+.section-heading::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: var(--gold);
+  margin-top: 12px;
+}
+
+.section-heading-center::after {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--navy); }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+/* Gold glow button */
+.btn-primary {
+  @apply bg-gold text-navy font-semibold px-8 py-3.5 rounded-lg;
+  @apply transition-all duration-300;
+  @apply hover:bg-gold-light hover:-translate-y-0.5;
+  box-shadow: 0 4px 15px rgba(201, 168, 76, 0.3);
+}
+.btn-primary:hover {
+  box-shadow: 0 6px 25px rgba(201, 168, 76, 0.5);
+}
+
+.btn-outline {
+  @apply border border-gold text-gold px-8 py-3.5 rounded-lg font-semibold;
+  @apply transition-all duration-300;
+  @apply hover:bg-gold/10 hover:-translate-y-0.5;
+}
+
+/* Card base */
+.card {
+  @apply bg-navy-card border border-slate-border rounded-xl p-6;
+  @apply transition-all duration-300;
+  @apply hover:border-gold/50 hover:-translate-y-1;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

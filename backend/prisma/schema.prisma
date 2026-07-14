@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  CONTRACTOR
+  WORKER
+}
+
+enum ProjectType {
+  RESIDENTIAL
+  COMMERCIAL
+  INFRASTRUCTURE
+  INDUSTRIAL
+}
+
+enum ProjectStatus {
+  PLANNING
+  FOUNDATION
+  STRUCTURE
+  FINISHING
+  COMPLETED
+  ON_HOLD
+}
+
+enum PaymentMode {
+  CASH
+  UPI
+  NEFT
+  IMPS
+  RTGS
+  CHEQUE
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  HALF_DAY
+  LEAVE
+  HOLIDAY
+}
+
+enum DisputeStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(ADMIN)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Worker {
+  id           String   @id @default(uuid())
+  workerId     String   @unique
+  name         String
+  phone        String   @unique
+  aadhaarLast4 String?
+  skill        String
+  dailyWage    Float
+  siteId       String?
+  site         Site?    @relation(fields: [siteId], references: [id])
+  isActive     Boolean  @default(true)
+  joinedAt     DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  attendance Attendance[]
+  payments   Payment[]
+  disputes   Dispute[]
+  otps       OtpCode[]
+
+  @@map("workers")
+}
+
+model Site {
+  id        String   @id @default(uuid())
+  name      String
+  location  String
+  state     String
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  workers    Worker[]
+  attendance Attendance[]
+
+  @@map("sites")
+}
+
+model Project {
+  id          String        @id @default(uuid())
+  slug        String        @unique
+  title       String
+  description String?
+  type        ProjectType
+  status      ProjectStatus @default(PLANNING)
+  location    String
+  state       String
+  area        String?
+  startDate   DateTime?
+  endDate     DateTime?
+  images      String        @default("[]")
+  isPublished Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  sites Site[]
+
+  @@map("projects")
+}
+
+model Attendance {
+  id        String           @id @default(uuid())
+  worker    Worker           @relation(fields: [workerId], references: [id])
+  workerId  String
+  site      Site             @relation(fields: [siteId], references: [id])
+  siteId    String
+  date      DateTime
+  status    AttendanceStatus
+  hours     Float?
+  notes     String?
+  markedBy  String?
+  createdAt DateTime         @default(now())
+
+  @@unique([workerId, date])
+  @@map("attendance")
+}
+
+model Payment {
+  id         String        @id @default(uuid())
+  worker     Worker        @relation(fields: [workerId], references: [id])
+  workerId   String
+  amount     Float
+  mode       PaymentMode
+  status     PaymentStatus @default(PENDING)
+  paidAt     DateTime?
+  reference  String?
+  slipUrl    String?
+  remarks    String?
+  recordedBy String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@map("payments")
+}
+
+model Dispute {
+  id          String        @id @default(uuid())
+  worker      Worker        @relation(fields: [workerId], references: [id])
+  workerId    String
+  type        String
+  description String
+  status      DisputeStatus @default(OPEN)
+  paymentDate DateTime?
+  resolvedAt  DateTime?
+  resolution  String?
+  resolvedBy  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("disputes")
+}
+
+model OtpCode {
+  id        String   @id @default(uuid())
+  worker    Worker   @relation(fields: [workerId], references: [id])
+  workerId  String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("otp_codes")
+}
+
+model Enquiry {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String
+  email       String
+  projectType String
+  message     String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("enquiries")
+}
