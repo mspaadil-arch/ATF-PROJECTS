@@ -1,0 +1,47 @@
+# Render Blueprint — deploys ONLY the backend web service.
+# Database is hosted externally on Supabase (Postgres). Provide the Supabase
+# DATABASE_URL in the Render dashboard (Environment) before the first deploy.
+#
+# Supabase connection notes:
+#   - Use the DIRECT connection string (port 5432) for migrations, e.g.
+#     postgresql://postgres:[PASSWORD]@db.[PROJECT].supabase.co:5432/postgres
+#   - The pooler URL (port 6543, ?pgbouncer=true) is for runtime pooling;
+#     Prisma migrations should use the direct URL above.
+#   - Supabase allows connections from all IPs by default, so Render can connect.
+
+services:
+  - type: web
+    name: atf-backend
+    runtime: node
+    rootDir: backend
+    plan: free
+    # Install deps, generate Prisma client, apply migrations, seed demo data, then start.
+    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy && npx ts-node prisma/seed.ts
+    startCommand: npm run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false   # paste your Supabase direct Postgres URL here
+      - key: JWT_SECRET
+        generateValue: true
+      # Set these in the Render dashboard after the frontend (Vercel) is live:
+      - key: FRONTEND_URL
+        sync: false
+      - key: TWILIO_SID
+        sync: false
+      - key: TWILIO_TOKEN
+        sync: false
+      - key: TWILIO_PHONE
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
